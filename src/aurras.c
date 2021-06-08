@@ -12,9 +12,10 @@
 
 int main (int argc, char * argv[]){
 
+	char msg1[] = "pending\n", msg2[] = "done!!\n", msg3[] = "refused\n";
 	int n;
-	int fIn = open("pOut1",O_RDONLY);
 	int fOut = open("pIn",O_WRONLY);
+	int fIn = open("pOut",O_RDONLY);
 	void *packet = malloc(PIPE_BUF);
 	char *buffer = packet + sizeof(pid_t);
 	pid_t *pid = packet;
@@ -37,11 +38,16 @@ int main (int argc, char * argv[]){
 		write(fOut,packet,n+sizeof(pid_t)+1);
 	}
 
+	if(argc > 1){
+		write(1,msg1,9);
+		pause();
+		write(1,msg2,8);
+	}
 	// abre os pipes
 	// envia informaçao e o seu pid
 	// espera por sinal
 	// prints da informaçao recebida
-	//close(fIn);
+	close(fIn);
 	close(fOut);
 	free(packet);
 }
