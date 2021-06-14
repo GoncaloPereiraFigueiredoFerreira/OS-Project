@@ -12,7 +12,7 @@
 
 
 void handler_term(int n){
-	int fIn = open("pOut",O_RDONLY);
+	int fIn = open("pOut",O_RDONLY | O_NONBLOCK);
 	void *packet2 = malloc(PIPE_BUF);
 	read(fIn,packet2,PIPE_BUF);
 	printf("%s\n", (char*)packet2 );
