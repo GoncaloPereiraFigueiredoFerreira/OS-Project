@@ -46,9 +46,22 @@ int endProgrm(){
 
 int statusHandler(){
 	//prints tasks on proc
-	char tmp[100];
+	char tmp[1024];
+	int i=0,j=0,count=0;
+	for (i=0; i< 100; i++){
+		count=0;
+		while (proc[i][count]!= NULL) count++;
+		if (count>=1){
+			sprintf(tmp,"task #%d:",i);
+			j=0;
+			while(j<count) {strcat(tmp," ");strcat(tmp, (char *) proc[i][j]); j++;}
+			strcat(tmp,"\n");
+			write(fdOut,tmp,strlen(tmp)*sizeof(char));
+		}
+
+	}
 	//prints filters
-	int i=0,j=0;
+	
 	for (i=0, j=0; i<nFilters; j++){
 		if (fltrs[j]!= NULL){
 			write(fdOut,"filter ",strlen("filter ") * sizeof(char));
@@ -61,7 +74,7 @@ int statusHandler(){
 	//prints PID
 	sprintf(tmp, "pid: %d", (int) getpid());
 	write(fdOut,tmp,strlen(tmp)*sizeof(char));
-	write(fdOut,"Querias, queria batatas com enguias\0",37);
+	//write(fdOut,"Querias, queria batatas com enguias\0",37);
 	return 0;
 }
 
