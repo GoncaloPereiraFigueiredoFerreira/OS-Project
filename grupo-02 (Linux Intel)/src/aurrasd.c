@@ -17,6 +17,9 @@ int nFilters=0;
 
 //./aurras transform <../samples/sample-1-so.m4a> output.m4a alto eco rapido
 
+//./aurrasd ../etc/aurrasd.conf aurrasd-filters/
+
+
 //codigo servidor
 
 
@@ -43,11 +46,23 @@ int endProgrm(){
 
 int statusHandler(){
 	//prints tasks on proc
+	char tmp[100];
 	//prints filters
+	int i=0,j=0;
+	for (i=0, j=0; i<nFilters; j++){
+		if (fltrs[j]!= NULL){
+			write(fdOut,"filter ",strlen("filter ") * sizeof(char));
+			write(fdOut,fltrs[j]->name,strlen(fltrs[j]->name) * sizeof(char));
+			sprintf(tmp,": %d/%d (running/max)\n",fltrs[j]->curr,fltrs[j]->max);
+			write(fdOut,tmp,strlen(tmp) * sizeof(char));
+			i++;
+		}
+	}
 	//prints PID
-
-	 write(fdOut,"Querias, queria batatas com enguias\0",37);
-	 return 0;
+	sprintf(tmp, "pid: %d", (int) getpid());
+	write(fdOut,tmp,strlen(tmp)*sizeof(char));
+	write(fdOut,"Querias, queria batatas com enguias\0",37);
+	return 0;
 }
 
 
@@ -59,15 +74,15 @@ int proc_args(unsigned char *l[]){
 	int j=0,i=0;
 	while (l[nargs]!= NULL) nargs++;
 	printf("Nº de args %d\n",nargs );
-
+	for (i=0; i<nargs;i++)printf("%s\n",l[i]);
 	if (nargs == 1 && strcmp("status",(char*) l[0]) == 0) statusHandler();
-	
+		
 	else if (nargs >=3){
 		if (strcmp("transform",(char*) l[0]) == 0){
 			char *input = l[1]; 
 			char *output = l[2];
 			int found;
-			for (i=0; i<nargs;i++)printf("%s\n",l[i]);
+			
 			for (i=3; i< nargs;i++){
 				found=0;
 				for ( j=0; j<nFilters && !found; j++){
