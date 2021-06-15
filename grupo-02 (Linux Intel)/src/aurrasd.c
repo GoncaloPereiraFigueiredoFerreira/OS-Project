@@ -68,7 +68,7 @@ int proc_args(unsigned char *l[]){
 			char *output = l[2];
 			int found;
 			for (i=0; i<nargs;i++)printf("%s\n",l[i]);
-			for (i=3; i< nargs;i++){
+			/*for (i=3; i< nargs;i++){
 				found=0;
 				for ( j=0; j<nFilters && !found; j++){
 					if (strcmp(fltrs[j]->name,(char*) l[i]) == 0){
@@ -109,6 +109,7 @@ int proc_args(unsigned char *l[]){
 			}
 		}
 	}
+	*/1
 	sleep(2);
 	return 0;
 }
@@ -226,4 +227,5 @@ int main (int argc, char *argv[]){ // config-filename filters-folder
 		close(fdIn);
 		unlink("pIn"); // verficar erro -1
 	}
+	return 0;
 }
