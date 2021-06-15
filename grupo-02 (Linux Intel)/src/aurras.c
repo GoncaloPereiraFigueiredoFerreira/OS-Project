@@ -16,7 +16,6 @@ void handler_term(int n){
 	void *packet2 = malloc(PIPE_BUF);
 	read(fIn,packet2,PIPE_BUF);
 	printf("%s\n", (char*)packet2 );
-	printf("OLa\n");
 	_exit(0);
 }
 
