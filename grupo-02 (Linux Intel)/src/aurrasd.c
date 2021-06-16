@@ -87,7 +87,6 @@ int proc_args(int ind,pid_t pid){
 	char **l = (char**) proc[ind];
 	while (l[nargs]!= NULL) {printf("%s\n",l[nargs]);nargs++;}
 	printf("Nº de args %d\n",nargs);
-	//int pipes[nargs-3][2];
 	int pipes[2];
 	int beforepipe = 0;
 
@@ -131,23 +130,24 @@ int proc_args(int ind,pid_t pid){
 
 		if (strcmp("transform",(char*) l[0]) == 0 && !fork()){
 			int input,output;
-			if((input = open(l[1],O_RDONLY)) == -1) printf("erroin\n"); 
-			if((output = open(l[2],O_CREAT|O_WRONLY|O_TRUNC,0640)) == -1) printf("errooff\n");
+			if((input = open(l[1],O_RDONLY)) == -1) perror("erroin\n"); 
+			if((output = open(l[2],O_CREAT|O_WRONLY|O_TRUNC,0640)) == -1) perror("errooff\n");
 			int found;
 			for (i=0; i<nargs;i++)printf("%s\n",l[i]);
 			for (i=3; i< nargs;i++){
 				found=0;
 				for ( j=0; j<nFilters && !found; j++){
 					if (strcmp(fltrs[j]->name,(char*) l[i]) == 0){
+						printf("%s  |   %s\n",fltrs[j]->name,fltrs[j]->cmd);
 						found=1;
 					}
 				}
 				if (found != 0){
-					//pipe(pipes[i-3]);
-					if (i == 3)pipe(pipes);
+					pipe(pipes);
+					j--;
 					if (fork() == 0){
+						close(pipes[0]);
 						if(i == 3 && i == nargs-1){
-							close(pipes[0]);
 							close(pipes[1]);
 							dup2(input,0);
 							dup2(output,1);
@@ -155,30 +155,30 @@ int proc_args(int ind,pid_t pid){
 						else if (i==3) {
 							dup2(input,0);
 							dup2(pipes[1],1);
-							close(pipes[0]);
 							close(pipes[1]);
 						}
 						else if (i == nargs-1){
-							dup2(pipes[0],0);
+							dup2(beforepipe,0);
 							dup2(output,1);
 							close(pipes[1]);
-							close(pipes[0]);
+							close(beforepipe);
 						}
 						else {
 							dup2(beforepipe,0);
 							dup2(pipes[1],1);
+							close(pipes[1]);
+							close(beforepipe);
 						}
 						if(execlp(fltrs[j]->cmd,fltrs[j]->cmd,NULL) == -1)
-							_exit(0);
-						//close(pipes[1]);
+							{perror(fltrs[j]->cmd);_exit(0);}
 					}
-					//close(beforepipe);
+					if (beforepipe)close(beforepipe);
 					beforepipe = pipes[0];
+					close(pipes[1]);
 				}
 			}
-			close(pipes[1]);
 			close(pipes[0]);
-			for(i = 3; i < nargs; i++) wait(NULL);
+			for(i = 3; i < nargs; i++) {wait(NULL);printf("Acabou i->%d\n",i);}
 			close(input);
 			close(output);
 		}
@@ -247,10 +247,11 @@ int readConfig(char * pathConfig,char * pathFilters){
 			tmp = buffer;
 			new = malloc(sizeof(struct filters));
 			new->name = strdup(strsep(&buffer," "));
-			cmd = strsep(&buffer," ");
-			new->cmd = malloc(sizeof(char) * (strlen(pathFilters)  + strlen(cmd)));
+			cmd = strdup(strsep(&buffer," "));
+			new->cmd = malloc(sizeof(char) * (strlen(pathFilters)  + strlen(cmd) + 20));
 			new->cmd = strcat(new->cmd,pathFilters);
 			new->cmd = strcat(new->cmd,cmd);
+			printf("cmd -> %s  ||  NewCmd-> %s\n",cmd,new->cmd);
 			max = strdup(strsep(&buffer,"\n\0"));
 			sscanf(max,"%d",&new->max);
 			new->curr=0;

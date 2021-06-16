@@ -7,11 +7,17 @@ client: bin/aurras
 serverc: 
 	bin/aurrasd ./etc/aurrasd.conf bin/aurrasd-filters/
 
-test: 
+test3: 
 	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco rapido 
 
 test2: 
-	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco 	
+	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco
+
+test1: 
+	bin/aurras transform samples/sample-1-so.m4a output.m4a eco 	
+
+testMusic:
+	bin/aurras transform samples/Ievan\ Polkka\ \(Loituma\).m4a output.m4a eco baixo  lento baixo		
 
 bin/aurrasd: obj/aurrasd.o
 	gcc -g obj/aurrasd.o -o bin/aurrasd
