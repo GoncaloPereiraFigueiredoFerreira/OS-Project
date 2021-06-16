@@ -8,7 +8,7 @@ int fdIn; // ->fifo de entrada
 int fdOut; // -->fifo de saida
 unsigned char *proc[100][100] = {NULL}; //Contém: proc[index do processo na table][comandos do processo]
 pid_t table[100] = {-1};
-int wait[100] = {-1};
+int waitQueue[100] = {-1};
 int nWait = 0;
 FLTRS fltrs[64];
 int nFilters=0;
@@ -32,8 +32,6 @@ int initPipes (){
 	fdIn = open("pIn",O_RDONLY);
 	fdOut = open("pOut",O_WRONLY);
 
-	semaphore = malloc(sizeof(int));
-	*semaphore =0;
 	return 0;
 }
 
@@ -43,13 +41,27 @@ int endProgrm(){
 	close(fdOut);
 	unlink("pIn");
 	unlink("pOut");
+	return 0;
 }
 
 int statusHandler(){
 	//prints tasks on proc
-	char tmp[100];
+	char tmp[1024];
+	int i=0,j=0,count=0;
+	for (i=0; i< 100; i++){
+		count=0;
+		while (proc[i][count]!= NULL) count++;
+		if (count>=1){
+			sprintf(tmp,"task #%d:",i);
+			j=0;
+			while(j<count) {strcat(tmp," ");strcat(tmp, (char *) proc[i][j]); j++;}
+			strcat(tmp,"\n");
+			write(fdOut,tmp,strlen(tmp)*sizeof(char));
+		}
+
+	}
 	//prints filters
-	int i=0,j=0;
+	
 	for (i=0, j=0; i<nFilters; j++){
 		if (fltrs[j]!= NULL){
 			write(fdOut,"filter ",strlen("filter ") * sizeof(char));
@@ -62,20 +74,24 @@ int statusHandler(){
 	//prints PID
 	sprintf(tmp, "pid: %d", (int) getpid());
 	write(fdOut,tmp,strlen(tmp)*sizeof(char));
-	write(fdOut,"Querias, queria batatas com enguias\0",37);
+	//write(fdOut,"Querias, queria batatas com enguias\0",37);
 	return 0;
 }
 
 
 
-int proc_args(int ind){
+int proc_args(int ind,pid_t pid){
 	//1º talvez contar o nº de argumentos
 	int nargs=0;
-	int j=0,i=0,n = 0,nfil[nFilters] = {0};
-	char *l[] = proc[ind];
-	while (l[nargs]!= NULL) nargs++;
-	int pipes[nargs-4][2];
-	printf("Nº de args %d\n",nargs );
+	int j=0,i=0,n = 0,nfil[nFilters];
+	char **l = (char**) proc[ind];
+	while (l[nargs]!= NULL) {printf("%s\n",l[nargs]);nargs++;}
+	printf("Nº de args %d\n",nargs);
+	//int pipes[nargs-3][2];
+	int pipes[2];
+	int beforepipe = 0;
+
+	for(i = 0;i < nFilters;i++)nfil[i] = 0;
 
 	if (nargs == 1 && strcmp("status",(char*) l[0]) == 0) {
 		statusHandler();
@@ -105,60 +121,68 @@ int proc_args(int ind){
 			if(n && nfil[i] > fltrs[i]->max){
 				//tratar de mandar para a merda
 			}
-			else if fltrs[i]->curr += nfil[i];
+			else fltrs[i]->curr += nfil[i];
 		}
 		if(n){
-			for(i = nWait;wait[i] != -1;nWait = (nWait + 1)%100);
-			wait[i] = ind;
+			for(i = nWait;waitQueue[i] != -1;nWait = (nWait + 1)%100);
+			waitQueue[i] = ind;
 		}
 		nproc++;
 
 		if (strcmp("transform",(char*) l[0]) == 0 && !fork()){
-			int input = open(l[1],O_RDONLY); 
-			int output = open(l[2],O_WRONLY);
+			int input,output;
+			if((input = open(l[1],O_RDONLY)) == -1) printf("erroin\n"); 
+			if((output = open(l[2],O_CREAT|O_WRONLY|O_TRUNC,0640)) == -1) printf("errooff\n");
 			int found;
 			for (i=0; i<nargs;i++)printf("%s\n",l[i]);
 			for (i=3; i< nargs;i++){
 				found=0;
 				for ( j=0; j<nFilters && !found; j++){
 					if (strcmp(fltrs[j]->name,(char*) l[i]) == 0){
-						printf("Filtro: %s\n",fltrs[j]->name );
-						printf("Filtro: %s\n",fltrs[j]->cmd );
-
 						found=1;
 					}
 				}
 				if (found != 0){
-					while(fltrs[j]->max == fltrs[j]->curr);
-					pipe(pipes[i-3]);
+					//pipe(pipes[i-3]);
+					if (i == 3)pipe(pipes);
 					if (fork() == 0){
-						if (i==3) { 
-							dup2(pipes[0][1],1);
-							close(pipes[0][0]);
+						if(i == 3 && i == nargs-1){
+							close(pipes[0]);
+							close(pipes[1]);
 							dup2(input,0);
-							close();
-							printf("Filtro n %d\n",j);
-							execlp(fltrs[j]->cmd,fltrs[j]->cmd,NULL);
+							dup2(output,1);
+						}
+						else if (i==3) {
+							dup2(input,0);
+							dup2(pipes[1],1);
+							close(pipes[0]);
+							close(pipes[1]);
 						}
 						else if (i == nargs-1){
+							dup2(pipes[0],0);
 							dup2(output,1);
-							dup2(pipes[i-2][0],0);
-							close(pipes[i-3][0],0);
-							printf("Filtro n %d\n",j);
-							execlp(fltrs[j]->cmd,fltrs[j]->cmd,NULL);
+							close(pipes[1]);
+							close(pipes[0]);
 						}
 						else {
-							dup2(pipes[i-3][1],1);
-							dup2(pipes[i-2][0],0);
-							close(pipes[i-3][0],0);
-							printf("Filtro n %d\n",j);
-							execlp(fltrs[j]->cmd,fltrs[j]->cmd,NULL);
+							dup2(beforepipe,0);
+							dup2(pipes[1],1);
 						}
+						if(execlp(fltrs[j]->cmd,fltrs[j]->cmd,NULL) == -1)
+							_exit(0);
+						//close(pipes[1]);
 					}
+					//close(beforepipe);
+					beforepipe = pipes[0];
 				}
 			}
-		else return 0;
+			close(pipes[1]);
+			close(pipes[0]);
+			for(i = 3; i < nargs; i++) wait(NULL);
+			close(input);
+			close(output);
 		}
+		else return 0;
 	}
 
 	free(proc[ind][0]);
@@ -180,11 +204,12 @@ void handler_term(int n){
 }
 
 void int_handler(int n){
+	printf("ola\n");
 	for(int i = 0; i < 100;i++){
 		if(table[i] != 0 && proc[i][0] == NULL){
 			for(int j = 3; proc[i][j] != NULL;j++){
 				for(int k = 0; k < nFilters;k++){
-					if(!(strcmp(fltrs[k]->name,proc[i][j]))) {
+					if(!(strcmp(fltrs[k]->name,(char *)proc[i][j]))) {
 						fltrs[k]->curr--;
 					}
 				}
@@ -197,10 +222,11 @@ void int_handler(int n){
 			proc[i][1] = NULL;
 			proc[i][2] = NULL;
 			table[i] = -1;
+			nproc--;
 		}
 	}
-	if(wait[nWait] != -1){proc_args(wait[nWait]);}
-	wait[nWait] = -1;
+	if(waitQueue[nWait] != -1){proc_args(waitQueue[nWait],table[waitQueue[nWait]]);}
+	waitQueue[nWait] = -1;
 	nWait = (nWait + 1) % 100;
 }
 
@@ -291,7 +317,7 @@ int main (int argc, char *argv[]){ // config-filename filters-folder
 				proc[ind][i][j] = '\0';
 
 				if(buffer[n] == '\0'){
-					proc_args(ind);
+					proc_args(ind,pid);
 				}
 				n++;
 			}

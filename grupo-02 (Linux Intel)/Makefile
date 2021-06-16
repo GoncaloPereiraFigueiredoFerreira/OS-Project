@@ -4,6 +4,15 @@ server: bin/aurrasd
 
 client: bin/aurras
 
+serverc: 
+	bin/aurrasd ./etc/aurrasd.conf bin/aurrasd-filters/
+
+test: 
+	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco rapido 
+
+test2: 
+	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco 	
+
 bin/aurrasd: obj/aurrasd.o
 	gcc -g obj/aurrasd.o -o bin/aurrasd
 
