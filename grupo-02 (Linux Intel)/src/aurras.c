@@ -68,6 +68,6 @@ int main (int argc, char * argv[]){
 		write(1,"Erro: Comando não reconhecido \n",strlen("Erro: Comando não reconhecido \n"));7
 		write(1,"Por favor use:\n",strlen("Por favor use:\n"));
 		write(1,"aurras status -> Receber estado do processamento do servidor\n",strlen("aurras status -> Receber estado do processamento do servidor\n"));
-		write(1,"aurras transform <inputFile> <outputFile> Filter1 Filter2 ... -> aplicação de filtros no inputFile\n")
+		write(1,"aurras transform <inputFile> <outputFile> Filter1 Filter2 ... -> aplicação de filtros no inputFile\n",strlen("aurras transform <inputFile> <outputFile> Filter1 Filter2 ... -> aplicação de filtros no inputFile\n"));
 	}
 }
