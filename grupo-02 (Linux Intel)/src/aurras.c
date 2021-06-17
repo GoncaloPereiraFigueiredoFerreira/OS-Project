@@ -45,7 +45,7 @@ int main (int argc, char * argv[]){
 
 
 		fOut = open("tmp/pIn",O_WRONLY);
-		fIn = open("tmp/pOut",O_RDONLY);
+		fIn = open("tmp/pOut",O_RDONLY | O_NONBLOCK);
 		if(fOut == -1 || fIn == -1) {printf("Server close");return 0;}
 		if((packet = malloc(PIPE_BUF))==(void*)-1)perror("Malloc");
 		char *buffer = packet + sizeof(pid_t);

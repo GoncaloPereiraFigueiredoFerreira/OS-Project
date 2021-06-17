@@ -20,7 +20,10 @@ test1:
 	bin/aurras transform samples/sample-1-so.m4a output.m4a eco 	
 
 testMusic:
-	bin/aurras transform samples/Ievan\ Polkka\ \(Loituma\).m4a output.m4a eco baixo  lento baixo		
+	bin/aurras transform samples/Ievan\ Polkka\ \(Loituma\).m4a output.m4a baixo lento baixo		
+
+testStatus:
+	bin/aurras status		
 
 bin/aurrasd: obj/aurrasd.o
 	gcc -g obj/aurrasd.o -o bin/aurrasd

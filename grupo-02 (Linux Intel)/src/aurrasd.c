@@ -92,8 +92,11 @@ int proc_args(int ind,pid_t pid){
 	int nargs=0;
 	int j=0,i=0,n = 0,nfil[nFilters];
 	char **l = (char**) proc[ind];
-	while (l[nargs]!= NULL) {printf("%s\n",l[nargs]);nargs++;}
-	printf("Nº de args %d\n",nargs);
+	while (l[nargs]!= NULL) {
+		//printf("%s\n",l[nargs]);
+		nargs++;
+	}
+	//printf("Nº de args %d\n",nargs);
 	int pipes[2];
 	int beforepipe = 0;
 	pid_t aux;
@@ -116,7 +119,7 @@ int proc_args(int ind,pid_t pid){
 			for(j = 3; j < nargs;j++){
 				if(!strcmp(fltrs[i]->name,l[j])){
 					nfil[i]++;
-					printf("nfil -> %d > %d\n",(fltrs[i]->curr)+nfil[i],(fltrs[i]->max));
+					//printf("nfil -> %d > %d\n",(fltrs[i]->curr)+nfil[i],(fltrs[i]->max));
 					if(fltrs[i]->curr + nfil[i] > (fltrs[i]->max)) n = 1; //falg para saber se o max de algum filtro e passado 
 				}
 			}
@@ -124,7 +127,7 @@ int proc_args(int ind,pid_t pid){
 		for (i = 0; i < nFilters;i++){
 			if(n && nfil[i] > fltrs[i]->max){
 				if(kill(pid,SIGUSR1)==-1)perror("Kill");
-				printf("exeço\n");
+				//printf("exeço\n");
 				table[ind] = 0;
 				for(j = 0;proc[ind][j] != NULL; j++){
 					free(proc[ind][j]);
@@ -132,29 +135,36 @@ int proc_args(int ind,pid_t pid){
 				}
 				return 0;
 			}
-			else if(!n){fltrs[i]->curr += nfil[i];printf("nfil -> %s -> %d\n",fltrs[i]->name,nfil[i]);}
+			else if(!n){
+				fltrs[i]->curr += nfil[i];
+			//printf("nfil -> %s -> %d\n",fltrs[i]->name,nfil[i]);
+			}
 		}
 		nproc++;
 		if(n){
-			printf("Entrou na queue\n");
+			//printf("Entrou na queue\n");
 			for(i = nWait;waitQueue[i] != -1;i = (i + 1)%100);
 			waitQueue[i] = ind;
 			return 0;
 		}
 
-		if (strcmp("transform",(char*) l[0]) == 0){kill(pid,SIGUSR2);table[ind] = -1;printf("free\n");}
+		if (strcmp("transform",(char*) l[0]) == 0){
+			kill(pid,SIGUSR2);
+			table[ind] = -1;
+			//printf("free\n");
+		}
 		if((aux = fork())==-1)perror("Fork"); 
 		if(!aux){
 			int input,output;
 			if((input = open(l[1],O_RDONLY)) == -1) perror("erroin\n"); 
 			if((output = open(l[2],O_CREAT|O_WRONLY|O_TRUNC,0640)) == -1) perror("erroout\n");
 			int found;
-			for (i=1; i<nargs;i++)printf("%s\n",l[i]);
+			//for (i=1; i<nargs;i++)//printf("%s\n",l[i]);
 			for (i=3; i< nargs;i++){
 				found=0;
 				for ( j=0; j<nFilters && !found; j++){
 					if (strcmp(fltrs[j]->name,(char*) l[i]) == 0){
-						printf("%s  |   %s\n",fltrs[j]->name,fltrs[j]->cmd);
+						//printf("%s  |   %s\n",fltrs[j]->name,fltrs[j]->cmd);
 						found=1;
 					}
 				}
@@ -195,7 +205,10 @@ int proc_args(int ind,pid_t pid){
 				}
 			}
 			if(close(pipes[0])==-1)perror("Close");
-			for(i = 3; i < nargs; i++) {wait(NULL);printf("Acabou i->%d\n",i);}
+			for(i = 3; i < nargs; i++) {
+				wait(NULL);
+				//printf("Acabou i->%d\n",i);
+			}
 			if(close(input)==-1)perror("Close");
 			if(close(output)==-1)perror("Close");
 			if(kill(pid,SIGTERM)==-1)perror("Kill"); //este term so devia ser mandado no proc args // verficar erro -1
@@ -213,8 +226,8 @@ void handler_term(int n){
 	endProgrm();
 	int ret;
 	flag = 0;
-	for(int i = 0;i < nproc;i++) {wait(&ret);printf("nproc -> %d\n",nproc);}
-
+	for(int i = 0;i < nproc;i++) {wait(&ret);//printf("nproc -> %d\n",nproc);
+	}
 	//ach q depois disto deveria existir um _exit(), em vez da flag.
 }
 
@@ -225,7 +238,7 @@ void int_handler(int n){
 				for(int k = 0; k < nFilters;k++){
 					if(!(strcmp(fltrs[k]->name,(char *)proc[i][j]))) {
 						fltrs[k]->curr--;
-						printf("%s->curr = %d\n",fltrs[k]->name,fltrs[k]->curr);
+						//printf("%s->curr = %d\n",fltrs[k]->name,fltrs[k]->curr);
 					}
 				}
 				if(proc[i][j])
@@ -243,7 +256,7 @@ void int_handler(int n){
 		}
 	}
 	if(waitQueue[nWait] != -1){
-		printf("Saiu da queu!\n");
+		//printf("Saiu da queu!\n");
 		proc_args(waitQueue[nWait],table[waitQueue[nWait]]);
 		waitQueue[nWait] = -1;
 		nWait = (nWait + 1) % 100;
@@ -272,13 +285,13 @@ int readConfig(char * pathConfig,char * pathFilters){
 			if((new->cmd = malloc(sizeof(char) * (strlen(pathFilters)  + strlen(cmd) + 1)))==(void *)-1)perror("Malloc");
 			new->cmd = strcat(new->cmd,pathFilters);
 			new->cmd = strcat(new->cmd,cmd);
-			printf("cmd -> %s  ||  NewCmd-> %s\n",cmd,new->cmd);
+			//printf("cmd -> %s  ||  NewCmd-> %s\n",cmd,new->cmd);
 			max = strdup(strsep(&buffer,"\n\0"));
 			sscanf(max,"%d",&new->max);
 			new->curr=0;
 			fltrs[nFilters] = new;
 			nFilters++;
-			printf("%s %s %d\n",new->name,new->cmd,new->max );
+			//printf("%s %s %d\n",new->name,new->cmd,new->max );
 			free(cmd);
 			free(max);
 			free(tmp);
@@ -312,7 +325,10 @@ int main (int argc, char *argv[]){ // config-filename filters-folder
 		if((nread = read(fdIn,buffer,PIPE_BUF))==-1)perror("Read"); //verificar erros -1
 
 		while(flag){
-			if(n == nread) {if((nread = read(fdIn,buffer,PIPE_BUF))==-1)perror("Read");n = 0;printf("new_n-> %d\n",n);} //verificar erros -1
+			if(n == nread) {
+				if((nread = read(fdIn,buffer,PIPE_BUF))==-1)perror("Read");
+				n = 0;
+			}
 
 			if(nread > 0){
 				pid = 0;
@@ -344,13 +360,12 @@ int main (int argc, char *argv[]){ // config-filename filters-folder
 				proc[ind][i][j] = '\0';
 
 				if(buffer[n] == '\0'){
-					printf("pid -> %d\n",pid);
+					//printf("pid -> %d\n",pid);
 					proc_args(ind,pid);
 				}
 				n++;
 			}
 		}
-		endProgrm();
 	}
 	return 0;
 }
