@@ -327,7 +327,7 @@ int main (int argc, char *argv[]){ // config-filename filters-folder
 		if((nread = read(fdIn,buffer,PIPE_BUF))==-1)perror("Read"); //verificar erros -1
 
 		while(flag){
-			if(n == nread) {
+			if(n == nread && flag) {
 				if((nread = read(fdIn,buffer,PIPE_BUF))==-1)perror("Read");
 				n = 0;
 			}
