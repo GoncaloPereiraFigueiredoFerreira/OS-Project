@@ -151,7 +151,7 @@ int proc_args(int ind,pid_t pid){
 		if (strcmp("transform",(char*) l[0]) == 0){
 			kill(pid,SIGUSR2);
 			table[ind] = -1;
-			//printf("free\n");
+			printf("IND :%d\n",ind);
 		}
 		if((aux = fork())==-1)perror("Fork"); 
 		if(!aux){
@@ -213,7 +213,7 @@ int proc_args(int ind,pid_t pid){
 			if(close(output)==-1)perror("Close");
 			if(kill(pid,SIGTERM)==-1)perror("Kill"); //este term so devia ser mandado no proc args // verficar erro -1
 			if(kill(getppid(),SIGINT)==-1)perror("Kill");
-			_exit(1);
+			_exit(ind);
 		}
 		else return 0;
 	}
@@ -233,12 +233,13 @@ void handler_term(int n){
 
 void int_handler(int n){
 	if (signal(SIGINT,int_handler) == SIG_ERR) perror("SIGINT error\n");
-	int found=0;	
-	for(int i = 0; i < 100 && !found;i++){
-		if(table[i] == -1){
-			for(int j = 3; proc[i][j] != NULL;j++){
-				for(int k = 0; k < nFilters;k++){
-					if(!(strcmp(fltrs[k]->name,(char *)proc[i][j]))) {
+	int i;
+	wait(&i);
+	i = WEXITSTATUS(i);
+	printf("I: %d\n",i );
+	for(int j = 3; proc[i][j] != NULL;j++){
+		for(int k = 0; k < nFilters;k++){
+		if(!(strcmp(fltrs[k]->name,(char *)proc[i][j]))) {
 						fltrs[k]->curr--;
 						printf("%s->curr = %d\n",fltrs[k]->name,fltrs[k]->curr);
 					}
@@ -254,10 +255,8 @@ void int_handler(int n){
 			proc[i][1] = NULL;
 			proc[i][2] = NULL;
 			table[i] = 0;
-			nproc--;
-			found=1;
-		}
-	}
+		
+	
 	if(waitQueue[nWait] != -1){
 		//printf("Saiu da queu!\n");
 		proc_args(waitQueue[nWait],table[waitQueue[nWait]]);
