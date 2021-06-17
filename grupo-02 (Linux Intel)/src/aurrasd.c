@@ -232,13 +232,15 @@ void handler_term(int n){
 }
 
 void int_handler(int n){
-	for(int i = 0; i < 100;i++){
+	if (signal(SIGINT,int_handler) == SIG_ERR) perror("SIGINT error\n");
+	int found=0;	
+	for(int i = 0; i < 100 && !found;i++){
 		if(table[i] == -1){
 			for(int j = 3; proc[i][j] != NULL;j++){
 				for(int k = 0; k < nFilters;k++){
 					if(!(strcmp(fltrs[k]->name,(char *)proc[i][j]))) {
 						fltrs[k]->curr--;
-						//printf("%s->curr = %d\n",fltrs[k]->name,fltrs[k]->curr);
+						printf("%s->curr = %d\n",fltrs[k]->name,fltrs[k]->curr);
 					}
 				}
 				if(proc[i][j])
@@ -253,6 +255,7 @@ void int_handler(int n){
 			proc[i][2] = NULL;
 			table[i] = 0;
 			nproc--;
+			found=1;
 		}
 	}
 	if(waitQueue[nWait] != -1){
