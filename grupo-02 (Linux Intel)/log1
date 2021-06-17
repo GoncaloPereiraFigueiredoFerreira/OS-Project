@@ -1,0 +1,80 @@
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s bin/aurrasd ./etc/aurrasd.conf bin/aurrasd-filters/
+cmd -> aurrasd-gain-double  ||  NewCmd-> bin/aurrasd-filters/aurrasd-gain-double
+alto bin/aurrasd-filters/aurrasd-gain-double 2
+cmd -> aurrasd-gain-half  ||  NewCmd-> bin/aurrasd-filters/aurrasd-gain-half
+baixo bin/aurrasd-filters/aurrasd-gain-half 2
+cmd -> aurrasd-echo  ||  NewCmd-> bin/aurrasd-filters/aurrasd-echo
+eco bin/aurrasd-filters/aurrasd-echo 1
+cmd -> aurrasd-tempo-double  ||  NewCmd-> bin/aurrasd-filters/aurrasd-tempo-double
+rapido bin/aurrasd-filters/aurrasd-tempo-double 2
+cmd -> aurrasd-tempo-half  ||  NewCmd-> bin/aurrasd-filters/aurrasd-tempo-half
+lento bin/aurrasd-filters/aurrasd-tempo-half 1
+new_n-> 0
+pid -> 5354
+transform
+samples/Ievan Polkka (Loituma).m4a
+output.m4a
+eco
+baixo
+lento
+baixo
+Nº de args 7
+nfil -> 1 > 2
+nfil -> 2 > 2
+nfil -> 1 > 1
+nfil -> 1 > 1
+nfil -> alto -> 0
+nfil -> baixo -> 2
+nfil -> eco -> 1
+nfil -> rapido -> 0
+nfil -> lento -> 1
+free
+samples/Ievan Polkka (Loituma).m4a
+output.m4a
+eco
+baixo
+lento
+baixo
+eco  |   bin/aurrasd-filters/aurrasd-echo
+baixo  |   bin/aurrasd-filters/aurrasd-gain-half
+lento  |   bin/aurrasd-filters/aurrasd-tempo-half
+baixo  |   bin/aurrasd-filters/aurrasd-gain-half
+Acabou i->3
+Acabou i->4
+Acabou i->5
+Acabou i->6
+cmd -> aurrasd-gain-double  ||  NewCmd-> bin/aurrasd-filters/aurrasd-gain-double
+alto bin/aurrasd-filters/aurrasd-gain-double 2
+cmd -> aurrasd-gain-half  ||  NewCmd-> bin/aurrasd-filters/aurrasd-gain-half
+baixo bin/aurrasd-filters/aurrasd-gain-half 2
+cmd -> aurrasd-echo  ||  NewCmd-> bin/aurrasd-filters/aurrasd-echo
+eco bin/aurrasd-filters/aurrasd-echo 1
+cmd -> aurrasd-tempo-double  ||  NewCmd-> bin/aurrasd-filters/aurrasd-tempo-double
+rapido bin/aurrasd-filters/aurrasd-tempo-double 2
+cmd -> aurrasd-tempo-half  ||  NewCmd-> bin/aurrasd-filters/aurrasd-tempo-half
+lento bin/aurrasd-filters/aurrasd-tempo-half 1
+new_n-> 0
+pid -> 5354
+transform
+samples/Ievan Polkka (Loituma).m4a
+output.m4a
+eco
+baixo
+lento
+baixo
+Nº de args 7
+nfil -> 1 > 2
+nfil -> 2 > 2
+nfil -> 1 > 1
+nfil -> 1 > 1
+nfil -> alto -> 0
+nfil -> baixo -> 2
+nfil -> eco -> 1
+nfil -> rapido -> 0
+nfil -> lento -> 1
+free
+eco->curr = 0
+baixo->curr = 1
+lento->curr = 0
+baixo->curr = 0
+new_n-> 0

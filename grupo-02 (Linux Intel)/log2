@@ -1,0 +1,5 @@
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s bin/aurras transform samples/Ievan\ Polkka\ \(Loituma\).m4a output.m4a eco baixo  lento baixo
+Pending!
+Processing!
+
+Finished!

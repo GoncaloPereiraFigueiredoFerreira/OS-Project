@@ -7,6 +7,9 @@ client: bin/aurras
 serverc: 
 	bin/aurrasd ./etc/aurrasd.conf bin/aurrasd-filters/
 
+test4: 
+	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco eco rapido
+
 test3: 
 	bin/aurras transform samples/sample-1-so.m4a output.m4a alto eco rapido 
 
@@ -31,6 +34,11 @@ bin/aurras: obj/aurras.o
 obj/aurras.o: src/aurras.c
 	gcc -Wall -g -c src/aurras.c -o obj/aurras.o
 
+memcheckServer:
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s bin/aurrasd ./etc/aurrasd.conf bin/aurrasd-filters/
+
+memcheckClient:
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s bin/aurras transform samples/Ievan\ Polkka\ \(Loituma\).m4a output.m4a eco baixo  lento baixo
 clean:
 	rm obj/* tmp/* bin/{aurras,aurrasd}
 
